@@ -1,62 +1,18 @@
 import time
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.optim as optim
 import matplotlib.pyplot as plt
-
-class AlexNetActivationExp(nn.Module):
-    def __init__(self, activation='relu', num_classes=10):
-        super(AlexNetActivationExp, self).__init__()
-        self.activation_type = activation
-        self.lrn = nn.LocalResponseNorm(size=5, alpha=1e-4, beta=0.75, k=2.0)
-        
-        self.conv1 = nn.Conv2d(3, 96, kernel_size=11, stride=4, padding=2)
-        self.pool1 = nn.MaxPool2d(kernel_size=3, stride=2)
-        
-        self.conv2 = nn.Conv2d(96, 256, kernel_size=5, padding=2)
-        self.pool2 = nn.MaxPool2d(kernel_size=3, stride=2)
-        
-        self.conv3 = nn.Conv2d(256, 384, kernel_size=3, padding=1)
-        self.conv4 = nn.Conv2d(384, 384, kernel_size=3, padding=1)
-        self.conv5 = nn.Conv2d(384, 256, kernel_size=3, padding=1)
-        self.pool3 = nn.MaxPool2d(kernel_size=3, stride=2)
-        
-        self.classifier = nn.Sequential(
-            nn.Dropout(p=0.5),
-            nn.Linear(256 * 6 * 6, 4096),
-            nn.Dropout(p=0.5),
-            nn.Linear(4096, 4096),
-            nn.Linear(4096, num_classes)
-        )
-
-    def _act(self, x):
-        if self.activation_type == 'relu':
-            return F.relu(x)
-        elif self.activation_type == 'tanh':
-            return torch.tanh(x)
-        elif self.activation_type == 'sigmoid':
-            return torch.sigmoid(x)
-        return x
-
-    def forward(self, x):
-        x = self.pool1(self.lrn(self._act(self.conv1(x))))
-        x = self.pool2(self.lrn(self._act(self.conv2(x))))
-        x = self._act(self.conv3(x))
-        x = self._act(self.conv4(x))
-        x = self.pool3(self._act(self.conv5(x)))
-        
-        x = torch.flatten(x, 1)
-        feats = self.classifier[:2](x)
-        feats = self._act(feats)
-        feats = self.classifier[2:4](feats)
-        feats = self._act(feats)
-        return self.classifier[4](feats)
+from models.alexnet import OriginalAlexNet
 
 def run_activation_experiment(trainloader, device, save_path="act_graph.png", epochs=2):
+    """
+    AlexNet Paper Section 3.1 & Figure 1 Activation Function Comparison Experiment
+    Compares ReLU vs Tanh vs Sigmoid in terms of Loss Convergence and Elapsed Time.
+    """
     def run_one(act_name):
         print(f"🏋️ [{act_name.upper()}] 기반 AlexNet 학습 시작...")
-        model = AlexNetActivationExp(activation=act_name).to(device)
+        model = OriginalAlexNet(num_classes=10, activation=act_name).to(device)
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9, weight_decay=0.0005)
         

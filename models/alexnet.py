@@ -6,55 +6,54 @@ class OriginalAlexNet(nn.Module):
     """
     Original AlexNet (Krizhevsky et al., NIPS 2012)
     Input: (B, 3, 224, 224)
+    Supports configurable activation functions ('relu', 'tanh', 'sigmoid') for Section 3.1 experiments.
     """
-    def __init__(self, num_classes=10):
+    def __init__(self, num_classes=10, activation='relu'):
         super(OriginalAlexNet, self).__init__()
+        self.activation_type = activation
         self.lrn = nn.LocalResponseNorm(size=5, alpha=1e-4, beta=0.75, k=2.0)
         
-        self.features = nn.Sequential(
-            # Conv1: 96 kernels, 11x11, stride 4, padding 2
-            nn.Conv2d(3, 96, kernel_size=11, stride=4, padding=2),
-            nn.ReLU(inplace=True),
-            self.lrn,
-            nn.MaxPool2d(kernel_size=3, stride=2), # (B, 96, 27, 27)
-            
-            # Conv2: 256 kernels, 5x5, padding 2
-            nn.Conv2d(96, 256, kernel_size=5, padding=2),
-            nn.ReLU(inplace=True),
-            self.lrn,
-            nn.MaxPool2d(kernel_size=3, stride=2), # (B, 256, 13, 13)
-            
-            # Conv3: 384 kernels, 3x3, padding 1
-            nn.Conv2d(256, 384, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            
-            # Conv4: 384 kernels, 3x3, padding 1
-            nn.Conv2d(384, 384, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            
-            # Conv5: 256 kernels, 3x3, padding 1
-            nn.Conv2d(384, 256, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=3, stride=2)  # (B, 256, 6, 6)
-        )
+        self.conv1 = nn.Conv2d(3, 96, kernel_size=11, stride=4, padding=2)
+        self.pool1 = nn.MaxPool2d(kernel_size=3, stride=2)
         
-        self.classifier = nn.Sequential(
-            nn.Dropout(p=0.5),
-            nn.Linear(256 * 6 * 6, 4096),
-            nn.ReLU(inplace=True),
-            
-            nn.Dropout(p=0.5),
-            nn.Linear(4096, 4096),
-            nn.ReLU(inplace=True),
-            
-            nn.Linear(4096, num_classes)
-        )
+        self.conv2 = nn.Conv2d(96, 256, kernel_size=5, padding=2)
+        self.pool2 = nn.MaxPool2d(kernel_size=3, stride=2)
+        
+        self.conv3 = nn.Conv2d(256, 384, kernel_size=3, padding=1)
+        self.conv4 = nn.Conv2d(384, 384, kernel_size=3, padding=1)
+        self.conv5 = nn.Conv2d(384, 256, kernel_size=3, padding=1)
+        self.pool3 = nn.MaxPool2d(kernel_size=3, stride=2)
+        
+        self.dropout1 = nn.Dropout(p=0.5)
+        self.fc1 = nn.Linear(256 * 6 * 6, 4096)
+        
+        self.dropout2 = nn.Dropout(p=0.5)
+        self.fc2 = nn.Linear(4096, 4096)
+        
+        self.fc3 = nn.Linear(4096, num_classes)
+
+    def _act(self, x):
+        if self.activation_type == 'relu':
+            return F.relu(x, inplace=True)
+        elif self.activation_type == 'tanh':
+            return torch.tanh(x)
+        elif self.activation_type == 'sigmoid':
+            return torch.sigmoid(x)
+        return x
 
     def forward(self, x):
-        x = self.features(x)
+        x = self.pool1(self.lrn(self._act(self.conv1(x))))
+        x = self.pool2(self.lrn(self._act(self.conv2(x))))
+        x = self._act(self.conv3(x))
+        x = self._act(self.conv4(x))
+        x = self.pool3(self._act(self.conv5(x)))
+        
         x = torch.flatten(x, 1)
-        x = self.classifier(x)
-        return x
+        x = self.dropout1(x)
+        x = self._act(self.fc1(x))
+        x = self.dropout2(x)
+        x = self._act(self.fc2(x))
+        return self.fc3(x)
 
 
 class TwoStreamAlexNet(nn.Module):
