@@ -1,9 +1,14 @@
 {
-    "python.defaultInterpreterPath": "/Users/yuhyunguk/.gemini/antigravity-ide/scratch/alexnet_project/.venv/bin/python",
-    "python.pythonPath": "/Users/yuhyunguk/.gemini/antigravity-ide/scratch/alexnet_project/.venv/bin/python",
-    "pyright.venvPath": "/Users/yuhyunguk/.gemini/antigravity-ide/scratch/alexnet_project",
-    "pyright.venv": ".venv",
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+    "python.pythonPath": "${workspaceFolder}/.venv/bin/python",
     "python.analysis.extraPaths": [
-        "/Users/yuhyunguk/.gemini/antigravity-ide/scratch/alexnet_project"
-    ]
+        "${workspaceFolder}/.venv/lib/python3.9/site-packages",
+        "${workspaceFolder}"
+    ],
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportMissingImports": "none",
+        "reportMissingModuleSource": "none"
+    },
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 1000
 }
