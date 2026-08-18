@@ -1,7 +1,12 @@
-# Auto GitHub Sync Rule for Deep Learning Study
+# Auto GitHub Repository Management & Sync Rule
 
-## Automatic Action Instructions
-Whenever the user modifies or adds new study files in this repository:
-1. Automatically format and organize the code cleanly.
-2. Run `git add .` and `git commit` with a clear chapter-based commit message.
-3. Automatically run `git push origin main` to sync all work to GitHub.
+## Automatic Instructions for Agent
+1. **Automatic Repository Naming & Setup**:
+   - Automatically pick a clear, standard GitHub repository name (e.g. `deep-learning-from-scratch-study`).
+   - If user asks to rename it later, update remote URLs and names accordingly.
+2. **Auto Commit & Push**:
+   - Whenever any python script, notebook, or documentation is created or modified, format code cleanly.
+   - Stage all changes (`git add .`), commit with descriptive chapter messages (`git commit -m "Feat(Ch01): ..."`).
+   - Push to GitHub (`git push origin main`).
+3. **Persistence Across Sessions**:
+   - Apply this rule automatically across all present and future conversation sessions.
