@@ -1,0 +1,7 @@
+{
+    "python.defaultInterpreterPath": "/Users/yuhyunguk/.gemini/antigravity-ide/scratch/image_augmentation/.venv/bin/python",
+    "python.analysis.extraPaths": [
+        "/Users/yuhyunguk/.gemini/antigravity-ide/scratch/alexnet_project"
+    ],
+    "python.linting.enabled": false
+}
