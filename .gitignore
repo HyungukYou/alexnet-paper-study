@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# PyTorch & Data
+data/
+*.pth
+*.pt
+*.onnx
+cifar10_data/
+
+# OS & Temp
+.DS_Store
+*.png
+
+# Virtual Environment
+.venv/
+venv/
+env/
