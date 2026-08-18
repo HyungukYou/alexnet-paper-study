@@ -1,0 +1,9 @@
+{
+  "search_paths": [
+    "/Users/yuhyunguk/.gemini/antigravity-ide/scratch/alexnet_project/.venv/lib/python3.9/site-packages",
+    "/Users/yuhyunguk/.gemini/antigravity-ide/scratch/alexnet_project"
+  ],
+  "disabled_rules": [
+    "missing-import"
+  ]
+}
