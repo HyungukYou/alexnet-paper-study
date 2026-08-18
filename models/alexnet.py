@@ -17,13 +17,20 @@ class LocalResponseNorm(nn.Module):
     """
     Section 3.3: Local Response Normalization (LRN)
     k=2, n=5, alpha=1e-4, beta=0.75
+    Includes MPS device fallback for Apple Silicon GPU compatibility.
     """
     def __init__(self, size=5, alpha=1e-4, beta=0.75, k=2.0):
         super(LocalResponseNorm, self).__init__()
-        self.lrn = nn.LocalResponseNorm(size=size, alpha=alpha, beta=beta, k=k)
+        self.size = size
+        self.alpha = alpha
+        self.beta = beta
+        self.k = k
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.lrn(x)
+        if x.device.type == 'mps':
+            # Fallback to CPU execution for PyTorch MPS missing LRN operator, then return to MPS
+            return F.local_response_norm(x.cpu(), self.size, self.alpha, self.beta, self.k).to(x.device)
+        return F.local_response_norm(x, self.size, self.alpha, self.beta, self.k)
 
 
 class OriginalAlexNet(nn.Module):
