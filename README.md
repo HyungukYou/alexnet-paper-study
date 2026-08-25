@@ -1,42 +1,63 @@
-# 🏛️ AlexNet Paper (Krizhevsky et al., NIPS 2012) Full Reproduction & Experiment Suite
+# 🏛️ Deep Learning Paper Study & Implementation Suite (AlexNet & ResNet)
 
-Google Colab 및 로컬 맥북 GPU(Apple Silicon MPS) 환경에서 **AlexNet (Krizhevsky et al., NIPS 2012)** 논문 원본 아키텍처 및 7가지 핵심 기능을 완벽히 재현한 프로젝트입니다.
+Google Colab 및 로컬 맥북 GPU(Apple Silicon MPS) 환경에서 대표적인 딥러닝 칭호 논문 아키텍처(**AlexNet**, **ResNet**)를 PyTorch로 직접 구현하고 실험하는 스터디 리포지토리입니다.
 
 ---
 
-## 📌 논문(2012) 핵심 기능 구현 현황
+## 📌 논문 구현 및 스터디 스크립트 요약
 
-| 논문 Section | 논문 명칭 & 핵심 기능 | 구현 파일 / 위치 |
+### 1. ⚡ ResNet (He et al., CVPR 2016)
+- **핵심 논문**: *Deep Residual Learning for Image Recognition*
+- **핵심 문제 해결**: 신경망이 깊어질수록 발생하던 성능 저하(Degeneration Problem)와 기울기 소실(Vanishing Gradient) 문제를 **Residual Shortcut Connection** ($\mathbf{y} = \mathcal{F}(\mathbf{x}) + \mathbf{x}$)을 통해 완벽히 해결.
+
+| 모듈 명칭 | 설명 및 아키텍처 스펙 | 관련 소스코드 |
 | :--- | :--- | :--- |
-| **Section 3.1** | **ReLU Nonlinearity** ($f(x) = \max(0, x)$ 도입 및 Tanh/Sigmoid 대비 빠른 수렴) | `models/alexnet.py`, `experiments/act_comparison.py` |
-| **Section 3.2** | **Two-GPU Parallel Stream Architecture** (GPU 1 흑백 에지 vs GPU 2 컬러 블롭 분리) | `models/alexnet.py` (`TwoStreamAlexNet`) |
-| **Section 3.3** | **Local Response Normalization (LRN)** ($k=2, n=5, \alpha=10^{-4}, \beta=0.75$) | `models/alexnet.py` (`LocalResponseNorm`) |
-| **Section 3.4** | **Overlapping Max Pooling** ($3 \times 3$ 커널, Stride $2$, 중첩 풀링) | `models/alexnet.py` (`MaxPool2d`) |
-| **Section 3.5** | **Overall Architecture** (Conv1~5, FC6~8 8-Layer 구조) | `models/alexnet.py` |
-| **Section 4.1** | **Data Augmentation** (Random Cropping, Horizontal Flipping, Normalization) | `main.py` |
-| **Section 4.2** | **Dropout (p=0.5)** (FC6, FC7 과적합 방지) | `models/alexnet.py` |
-| **Section 5** | **SGD with Momentum (0.9) & Weight Decay (0.0005)** | `main.py`, `experiments/act_comparison.py` |
+| **BasicBlock** | ResNet-18 / ResNet-34 전용 2-Layer 잔차 블록 ($3 \times 3 \rightarrow 3 \times 3$) | `study_resnet.py` (`BasicBlock`) |
+| **Bottleneck Block** | ResNet-50 / 101 / 152 전용 3-Layer 블록 ($1 \times 1 \rightarrow 3 \times 3 \rightarrow 1 \times 1$ 채널 4배 확장) | `study_resnet.py` (`Bottleneck`) |
+| **Shortcut Connection** | Identity Shortcut & Projection Shortcut (1x1 Conv, stride 2) 자동 처리 | `study_resnet.py` |
+| **Weight Init** | Kaiming (He) Normal Initialization 적용 (`kaiming_normal_`) | `study_resnet.py` (`_initialize_weights`) |
+| **Unit Test** | ResNet-18/34/50 입출력 차원 및 역전파(Backpropagation) 자동 검증 | `test_resnet.py` |
+
+---
+
+### 2. 🏛️ AlexNet (Krizhevsky et al., NIPS 2012)
+- **핵심 논문**: *ImageNet Classification with Deep Convolutional Neural Networks*
+- **핵심 기능**: ReLU 활성화 함수, Local Response Normalization (LRN), Overlapping Pooling, Dropout (0.5), SGD Momentum (0.9).
+- **관련 파일**: `study_alexnet.py`, `alexnet_colab_notebook.ipynb`
 
 ---
 
 ## 📁 프로젝트 파일 구조
 
 ```
-alexnet_project/
-├── 📄 README.md                          # 논문 기능 정리 및 가이드
-├── 🐍 main.py                            # 메인 파이프라인 (맥북 GPU MPS 가속)
-├── 📓 alexnet_colab_notebook.ipynb       # Google Colab 원클릭 실행 노트북
-├── 📁 models/
-│   └── 🐍 alexnet.py                     # OriginalAlexNet 및 TwoStreamAlexNet (Paper Specs)
-└── 📁 experiments/
-    └── 🐍 act_comparison.py              # Section 3.1 활성화 함수 수렴 비교 모듈
+alexnet-paper-study/
+├── 📄 README.md                          # 논문 핵심 분석 및 실행 가이드
+├── 🐍 study_resnet.py                    # ResNet-18/34/50 통합 구현 및 학습/시각화 스크립트
+├── 🧪 test_resnet.py                     # ResNet-18/34/50 자동 단위 테스트 (Unit Tests)
+├── 📊 resnet_study_result.png            # ResNet-18 학습 손실 수렴 시각화 그래프
+├── 🐍 study_alexnet.py                   # AlexNet 올인원 공부 및 실습 스크립트
+├── 📊 alexnet_study_result.png           # AlexNet 학습 손실 수렴 시각화 그래프
+└── 📓 alexnet_colab_notebook.ipynb       # Google Colab 원클릭 실습 노트북
 ```
 
 ---
 
-## 🚀 실행 가이드
+## 🚀 실행 가이드 (Apple Silicon GPU / CPU)
 
-### 맥북 로컬 실행 (Apple Silicon GPU)
+### 1. ResNet 구현 및 학습 테스트 실행
 ```bash
-python main.py
+python study_resnet.py
+```
+- 맥북 Apple Silicon GPU (`mps`) 및 CPU 환경을 자동으로 감지합니다.
+- CIFAR-10 데이터셋으로 ResNet-18 학습을 진행하고 `resnet_study_result.png` 그래프를 생성합니다.
+
+### 2. ResNet 단위 테스트 (Unit Tests) 실행
+```bash
+python test_resnet.py
+```
+- ResNet-18, ResNet-34, ResNet-50의 forward/backward pass 및 tensor shape 호환성을 검증합니다.
+
+### 3. AlexNet 학습 테스트 실행
+```bash
+python study_alexnet.py
 ```
